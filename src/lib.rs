@@ -211,8 +211,8 @@ impl CodeEditor {
     }
 
     /// Show Code Editor
-    pub fn show(&mut self, ui: &mut egui::Ui, text: &mut String) -> egui::Response {
-        let mut response: Option<egui::Response> = None;
+    pub fn show(&mut self, ui: &mut egui::Ui, text: &mut String) -> egui::text_edit::TextEditOutput {
+        let mut state: Option<egui::text_edit::TextEditOutput> = None;
         let mut code_editor = |ui: &mut egui::Ui| {
             ui.horizontal_top(|h| {
                 self.theme.modify_style(h, self.fontsize);
@@ -226,16 +226,16 @@ impl CodeEditor {
                             let layout_job = highlight(ui.ctx(), self, string);
                             ui.fonts(|f| f.layout_job(layout_job))
                         };
-                        let resp = ui.add(
+                        state = Some(
                             egui::TextEdit::multiline(text)
                                 .id_source(&self.id)
                                 .lock_focus(true)
                                 .desired_rows(self.rows)
                                 .frame(true)
                                 .desired_width(if self.shrink { 0.0 } else { f32::MAX })
-                                .layouter(&mut layouter),
+                                .layouter(&mut layouter)
+                                .show(ui)
                         );
-                        response = Some(resp);
                     });
             });
         };
@@ -248,6 +248,6 @@ impl CodeEditor {
             code_editor(ui);
         }
 
-        response.expect("response should exist at this point")
+        state.expect("response should exist at this point")
     }
 }
